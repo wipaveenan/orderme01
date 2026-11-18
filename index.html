@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบจัดการฝากซื้อของในกลุ่ม LINE (LIFF App)</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    :root {
+      --bg-page: #f7f6f2;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e5e7eb;
+      --ink: #111111;
+      --ink-body: #334155;
+      --ink-muted: #64748b;
+
+      /* Playful Interaction Palette */
+      --act-green: #6baa75;
+      --act-mint: #b7e1d1;
+      --act-amber: #ffad33;
+      --act-yellow: #ffec89;
+      --act-blue: #6698cc;
+      --act-sky: #a9d3ff;
+      --act-indigo: #4c57a9;
+      --act-purple: #967cc7;
+      --act-pink: #ffb5c1;
+      --act-red: #cc1400;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-page);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .app-shell {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    /* Clean White Header */
+    .top-header {
+      padding: 14px 16px 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .party-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    .party-meta {
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .avatar-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--act-yellow);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    /* Navigation Tabs */
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .tab-btn {
+      padding: 8px 4px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: var(--ink);
+      color: #ffffff;
+      border-color: var(--ink);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      padding: 14px 16px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .view-panel { display: none; flex-direction: column; gap: 12px; }
+    .view-panel.active { display: flex; }
+
+    /* Clean White Card */
+    .clean-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .soft-row {
+      background: var(--surface-soft);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .row-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .row-start {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Colorful Pills & Interactive Controls */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .pill.yellow { background: var(--act-yellow); color: var(--ink); }
+    .pill.mint { background: var(--act-mint); color: var(--ink); }
+    .pill.sky { background: var(--act-sky); color: var(--ink); }
+    .pill.pink { background: var(--act-pink); color: var(--ink); }
+    .pill.purple { background: #ede9fe; color: #5b21b6; }
+    .pill.amber { background: #fef3c7; color: #92400e; }
+    .pill.red { background: #fee2e2; color: var(--act-red); }
+
+    .int-btn {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+    .int-btn:active { transform: scale(0.98); }
+    .int-btn.green { background: var(--act-green); color: #ffffff; }
+    .int-btn.amber { background: var(--act-amber); color: var(--ink); }
+    .int-btn.blue { background: var(--act-blue); color: #ffffff; }
+    .int-btn.indigo { background: var(--act-indigo); color: #ffffff; }
+    .int-btn.red { background: var(--act-red); color: #ffffff; }
+    .int-btn.yellow { background: var(--act-yellow); color: var(--ink); border: 1.5px solid var(--ink); }
+    .int-btn.pink { background: var(--act-pink); color: var(--ink); }
+    .btn-photo-pink {
+      background: var(--act-pink);
+      color: var(--ink);
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-photo-pink:hover { opacity: 0.9; }
+    .int-btn.black { background: var(--ink); color: #ffffff; }
+    .int-btn.sm { padding: 6px 10px; font-size: 11.5px; }
+
+    /* Right-Hand Ergonomic Checkbox */
+    .rh-check {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+      user-select: none;
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      color: transparent;
+      transition: all 0.15s ease;
+    }
+    .rh-check.checked {
+      background: var(--act-green);
+      border-color: var(--act-green);
+      color: #ffffff;
+    }
+
+    /* Form Controls */
+    .input-mini {
+      width: 78px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-align: right;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    .select-mini {
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    .input-full {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font-size: 13px;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    /* KhunThong-Style Summary Card */
+    .kt-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .kt-head {
+      background: var(--act-green);
+      color: #ffffff;
+      padding: 14px 16px;
+    }
+
+    /* Toggle Switch */
+    .switch-btn {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      background: #f1f5f9;
+      color: var(--ink-muted);
+    }
+    .switch-btn.on {
+      background: var(--act-green);
+      border-color: var(--act-green);
+      color: #ffffff;
+    }
+
+    /* Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--act-green);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    /* Non-intrusive Ad Banner Slot (Monetization) */
+    .ad-banner {
+      margin-top: auto;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--surface-soft);
+      border: 1px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    /* In-Page Toast & Modal (No alert/confirm) */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--ink);
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+      white-space: nowrap;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 17, 17, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      padding: 16px;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-box {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 400px;
+      width: 100%;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-row">
+        <div>
+          <h1 class="party-title" id="party-name-title">ตี้ร้านตามสั่ง &amp; คาเฟ่</h1>
+          <div class="party-meta" id="party-meta-info">คนไปซื้อ: น้ำ • ปิดรับ 12:30 น.</div>
+        </div>
+        <button type="button" id="btn-switch-role" class="user-badge" title="สลับผู้ใช้เพื่อทดสอบสิทธิ์เจ้าของออเดอร์">
+          <span class="avatar-dot" id="current-user-avatar">น้ำ</span>
+          <span id="current-user-name">น้ำ (Runner)</span>
+        </button>
+      </div>
+
+      <!-- 4 Core Views -->
+      <nav class="tab-bar">
+        <button type="button" class="tab-btn active" data-tab="tab-shop">1. เช็กของ</button>
+        <button type="button" class="tab-btn" data-tab="tab-vat">2. บิล/VAT</button>
+        <button type="button" class="tab-btn" data-tab="tab-detail">3. รายละเอียด</button>
+        <button type="button" class="tab-btn" data-tab="tab-status">4. เช็กยอด</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+
+      <!-- ==================== TAB 1: STEP 3 CHECKLIST (RIGHT-HAND) ==================== -->
+      <section id="tab-shop" class="view-panel active">
+        <div class="row-between">
+          <span style="font-size:12px;color:var(--ink-muted);font-weight:600;">ติ๊กถูกด้านขวามือ • แก้ไขราคาจริงหน้าร้าน</span>
+          <span class="pill yellow" id="shop-grand-total">รวมค่าของ: 173 ฿</span>
+        </div>
+
+        <!-- Dynamic Member Groups Rendered Here -->
+        <div id="shop-list-container" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+        <button type="button" id="btn-send-bill-chat" class="int-btn green">
+          📤 สรุปบิล &amp; ส่งการ์ดเข้ากลุ่ม LINE
+        </button>
+      </section>
+
+      <!-- ==================== TAB 2: RECEIPT & VAT/SC SPLIT + EDIT ==================== -->
+      <section id="tab-vat" class="view-panel">
+        <div class="clean-card">
+          <div class="row-between" style="margin-bottom:10px;">
+            <div>
+              <div style="font-size:14px;font-weight:800;">คำนวณหาร Service &amp; VAT</div>
+              <div style="font-size:11px;color:var(--ink-muted);">ปันส่วนตามสัดส่วนราคาจริงของแต่ละคน</div>
+            </div>
+            <span class="pill purple">AI ใบเสร็จ</span>
+          </div>
+
+          <div class="soft-row row-between" style="margin-bottom:8px;">
+            <span style="font-size:12.5px;font-weight:700;">คิด Service Charge (10%)</span>
+            <button type="button" id="toggle-sc" class="switch-btn on">เปิด 10%</button>
+          </div>
+          <div class="soft-row row-between">
+            <span style="font-size:12.5px;font-weight:700;">คิด VAT (7%)</span>
+            <button type="button" id="toggle-vat" class="switch-btn on">เปิด 7%</button>
+          </div>
+        </div>
+
+        <div class="clean-card">
+          <div class="row-between" style="margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:800;">สรุปยอดแยกตามคน (หลังหาร VAT/SC)</span>
+            <button type="button" id="btn-open-add-item" class="pill sky" style="border:none;cursor:pointer;">+ เพิ่มรายการ</button>
+          </div>
+          <div id="vat-summary-container" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <button type="button" id="btn-save-vat-sync" class="int-btn amber">
+          ✓ บันทึกยอดหาร &amp; อัปเดต Google Sheets
+        </button>
+      </section>
+
+      <!-- ==================== TAB 3: BILL DETAIL & SLIP UPLOAD ==================== -->
+      <section id="tab-detail" class="view-panel">
+        <!-- KhunThong-Style Summary Header -->
+        <div class="kt-card">
+          <div class="kt-head row-between">
+            <div>
+              <div style="font-size:11px;opacity:0.95;" id="detail-party-title">ตี้ร้านตามสั่ง &amp; คาเฟ่ (รวม VAT/SC)</div>
+              <div style="font-size:26px;font-weight:800;line-height:1.15;" id="detail-net-total">฿ 204</div>
+              <div style="font-size:11px;opacity:0.9;">เรียกเก็บโดย น้ำ 💎</div>
+            </div>
+            <span class="pill yellow">บิลสรุป</span>
+          </div>
+          <div style="padding:12px 14px;" id="detail-breakdown-container"></div>
+        </div>
+
+        <!-- PromptPay & Slip Upload -->
+        <div class="clean-card">
+          <div class="row-between" style="margin-bottom:10px;">
+            <div>
+              <div style="font-size:11px;color:var(--ink-muted);">พร้อมเพย์คนไปซื้อ (น้ำ)</div>
+              <div style="font-size:15px;font-weight:800;" id="promptpay-number">083-085-5587</div>
+            </div>
+            <button type="button" id="btn-copy-promptpay" class="int-btn sm blue" style="width:auto;padding:7px 14px;">
+              📋 คัดลอกเลข
+            </button>
+          </div>
+
+          <div class="soft-row">
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;">ส่งสลิปโอนเงิน (เลือกได้ 2 ช่องทาง):</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <label for="slip-file-input" class="int-btn sm indigo" style="cursor:pointer;">
+                📎 แนบรูปสลิปที่นี่
+              </label>
+              <button type="button" id="btn-send-slip-chat" class="int-btn sm blue">
+                💬 ส่งสลิปในแชทกลุ่ม
+              </button>
+            </div>
+            <input type="file" id="slip-file-input" accept="image/*" style="display:none;">
+            <div id="slip-preview-box" style="display:none;margin-top:10px;text-align:center;">
+              <img id="slip-preview-img" alt="ตัวอย่างสลิป" style="max-height:160px;border-radius:10px;border:1px solid var(--border);margin:0 auto;display:block;">
+              <button type="button" id="btn-confirm-slip-upload" class="int-btn sm green" style="margin-top:8px;">
+                ✓ ยืนยันส่งสลิปนี้
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: COLLECTION STATUS & CLOSE ==================== -->
+      <section id="tab-status" class="view-panel">
+        <div class="clean-card">
+          <div class="row-between" style="margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:800;" id="status-collected-text">เก็บได้แล้ว: 139 / 204 ฿</span>
+            <span class="pill red" id="status-remaining-pill">รออีก 1 คน</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="status-progress-fill" style="width:68%;"></div>
+          </div>
+        </div>
+
+        <div id="status-members-container" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button type="button" id="btn-remind-unpaid" class="int-btn red">📌 ทวงยอดคนที่ยังไม่จ่าย</button>
+          <button type="button" id="btn-close-party" class="int-btn yellow">🎉 ปิดงาน (จบตี้)</button>
+        </div>
+      </section>
+
+      <!-- Non-intrusive Ad Banner Slot (Monetization) -->
+      <div class="ad-banner">
+        <div>
+          <span class="pill pink" style="margin-bottom:3px;">แนะนำพิเศษ</span>
+          <div style="font-weight:700;color:var(--ink);">ที่แขวนกระเป๋าพกพา &amp; น้ำหอมพกพา (ร้าน Shopee)</div>
+          <div style="font-size:10px;color:var(--ink-muted);">พื้นที่โฆษณาขนาดเล็ก / Affiliate ไม่บังปุ่มกดหลัก</div>
+        </div>
+        <button type="button" id="btn-ad-click" class="int-btn sm black" style="width:auto;padding:6px 12px;">ดูสินค้า →</button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Edit Item Modal (Owner / Runner Only) -->
+  <div id="modal-edit" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="row-between" style="margin-bottom:12px;">
+        <h3 style="margin:0;font-size:15px;font-weight:800;" id="modal-edit-title">แก้ไขรายการ</h3>
+        <button type="button" id="btn-close-modal" style="background:#f1f5f9;border:none;width:28px;height:28px;border-radius:50%;font-weight:700;cursor:pointer;">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <label style="font-size:11.5px;font-weight:700;display:block;margin-bottom:4px;">ชื่อสินค้า / เมนู</label>
+          <input type="text" id="edit-item-name" class="input-full">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:11.5px;font-weight:700;display:block;margin-bottom:4px;">จำนวนที่ได้จริง</label>
+            <input type="number" id="edit-item-qty" min="0" class="input-full">
+          </div>
+          <div>
+            <label style="font-size:11.5px;font-weight:700;display:block;margin-bottom:4px;">ราคาจริงรวม (บาท)</label>
+            <input type="number" id="edit-item-price" min="0" class="input-full">
+          </div>
+        </div>
+        <button type="button" id="btn-save-edit" class="int-btn green">✓ บันทึกการแก้ไข</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Zoom Lightbox Modal -->
+  <div id="modal-photo" class="modal-backdrop">
+    <div class="modal-box" style="padding:14px;">
+      <div class="row-between" style="margin-bottom:10px;">
+        <h3 style="margin:0;font-size:14px;font-weight:800;" id="modal-photo-title">รูปสินค้าที่เพื่อนส่งมา</h3>
+        <button type="button" id="btn-close-photo-modal" style="background:#f1f5f9;border:none;width:28px;height:28px;border-radius:50%;font-weight:700;cursor:pointer;">✕</button>
+      </div>
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:10px;text-align:center;">
+        <img id="modal-photo-img" alt="รูปสินค้าขยายใหญ่" style="max-width:100%;max-height:65vh;border-radius:10px;display:block;margin:0 auto;">
+      </div>
+      <div id="modal-photo-caption" style="font-size:12px;color:var(--ink-muted);text-align:center;margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">บันทึกเรียบร้อย</div>
+
+  <script>
+    // =========================================================================
+    // CONFIGURATION — ใส่ค่าจริงของคุณก่อนอัปโหลดขึ้น GitHub Pages
+    // =========================================================================
+    var CONFIG = {
+      LIFF_ID: "YOUR_LIFF_ID_HERE", // เช่น "200xxxxxxx-xxxxxxxx" จาก LINE Login Channel
+      MAKE_WEBHOOK_URL: "YOUR_MAKE_WEBHOOK_URL_HERE" // ลิงก์ Webhook จาก Make (Integromat)
+    };
+
+    // =========================================================================
+    // IN-MEMORY STATE (ตรงกับโครงสร้าง Google Sheets: Orders, Member_Summary, Party_Config)
+    // =========================================================================
+    var state = {
+      currentUser: { userId: "U_RUNNER_NAM", name: "น้ำ", role: "runner" },
+      party: {
+        id: "PTY-20261118",
+        name: "ตี้ร้านตามสั่ง & คาเฟ่",
+        runnerName: "น้ำ",
+        closeTime: "12:30 น.",
+        promptPay: "083-085-5587",
+        useSC: true,
+        useVAT: true
+      },
+      orders: [
+        { id: "ORD-001", userId: "U_USER_A_001", owner: "เอ (A)", item: "ข้าวผัดหมู", orderedQty: 1, actualQty: 1, status: "ครบ", checked: true, price: 60, paid: true, slipMethod: "ส่งในห้องแชท", photoUrl: "" },
+        { id: "ORD-002", userId: "U_USER_A_001", owner: "เอ (A)", item: "ข้าวไข่เจียว", orderedQty: 1, actualQty: 1, status: "ครบ", checked: true, price: 40, paid: true, slipMethod: "ส่งในห้องแชท", photoUrl: "" },
+        { id: "ORD-003", userId: "U_USER_B_002", owner: "บี (B)", item: "อเมริกาโน่เย็น (ไม่หวาน)", orderedQty: 1, actualQty: 1, status: "ครบ", checked: true, price: 55, paid: false, slipMethod: "-", photoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360' viewBox='0 0 360 360'><rect width='360' height='360' rx='24' fill='%23f8fafc'/><rect x='110' y='80' width='140' height='210' rx='18' fill='%23ffffff' stroke='%23cbd5e1' stroke-width='4'/><path d='M120 140 H240 L232 275 H128 Z' fill='%23451a03'/><rect x='135' y='110' width='90' height='35' rx='8' fill='%23bae6fd' opacity='0.7'/><rect x='174' y='35' width='12' height='110' rx='6' fill='%23ec4899'/><text x='180' y='325' text-anchor='middle' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23111111'>อเมริกาโน่เย็น ไม่หวาน 55.-</text></svg>" },
+        { id: "ORD-004", userId: "U_USER_C_003", owner: "ซี (C)", item: "โค้กซีโร่ กระป๋อง", orderedQty: 2, actualQty: 1, status: "ขาด", checked: true, price: 18, paid: true, slipMethod: "กดแนบรูปสลิป", photoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360' viewBox='0 0 360 360'><rect width='360' height='360' rx='24' fill='%23f8fafc'/><rect x='125' y='75' width='110' height='200' rx='20' fill='%23111111'/><rect x='125' y='125' width='110' height='60' fill='%23cc1400'/><text x='180' y='162' text-anchor='middle' font-family='sans-serif' font-size='20' font-weight='bold' fill='%23ffffff'>ZERO</text><text x='180' y='320' text-anchor='middle' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23111111'>โค้กซีโร่ กระป๋อง 18.-</text></svg>" }
+      ],
+      editingOrderId: null
+    };
+
+    var demoProfiles = [
+      { userId: "U_RUNNER_NAM", name: "น้ำ", role: "runner" },
+      { userId: "U_USER_A_001", name: "เอ (A)", role: "requester" },
+      { userId: "U_USER_B_002", name: "บี (B)", role: "requester" }
+    ];
+    var demoProfileIdx = 0;
+
+    // =========================================================================
+    // HELPERS & CALCULATIONS
+    // =========================================================================
+    function showToast(msg) {
+      var t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(function() { t.classList.remove("show"); }, 2400);
+    }
+
+    function getTaxMultiplier() {
+      var sc = state.party.useSC ? 0.10 : 0;
+      var vat = state.party.useVAT ? 0.07 : 0;
+      // Service Charge 10% + VAT 7% on top (or proportional ~17.7%)
+      return (1 + sc) * (1 + vat);
+    }
+
+    function calcMemberTotals() {
+      var map = {};
+      var mult = getTaxMultiplier();
+      state.orders.forEach(function(o) {
+        if (!map[o.owner]) {
+          map[o.owner] = { owner: o.owner, userId: o.userId, items: [], rawTotal: 0, vatSc: 0, netTotal: 0, paid: true, slipMethod: o.slipMethod };
+        }
+        map[o.owner].items.push(o);
+        var activePrice = (o.status === "ไม่มีของ") ? 0 : Number(o.price || 0);
+        map[o.owner].rawTotal += activePrice;
+        if (!o.paid) map[o.owner].paid = false;
+      });
+      var list = Object.keys(map).map(function(k) {
+        var m = map[k];
+        m.netTotal = Math.round(m.rawTotal * mult);
+        m.vatSc = m.netTotal - m.rawTotal;
+        return m;
+      });
+      return list;
+    }
+
+    function canEditOrder(order) {
+      return state.currentUser.role === "runner" || state.currentUser.userId === order.userId;
+    }
+
+    // =========================================================================
+    // RENDER FUNCTIONS
+    // =========================================================================
+    function renderAll() {
+      renderShopTab();
+      renderVatTab();
+      renderDetailTab();
+      renderStatusTab();
+      saveLocalState();
+    }
+
+    function renderShopTab() {
+      var container = document.getElementById("shop-list-container");
+      var members = calcMemberTotals();
+      var grandRaw = 0;
+      container.innerHTML = "";
+
+      members.forEach(function(m, idx) {
+        grandRaw += m.rawTotal;
+        var card = document.createElement("div");
+        card.className = "clean-card";
+
+        var header = '<div class="row-between" style="padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--border);">' +
+          '<span style="font-size:13px;font-weight:800;">' + (idx + 1) + '. ของ ' + m.owner + '</span>' +
+          '<span class="pill yellow">รวม: ' + m.rawTotal + ' ฿</span>' +
+        '</div>';
+
+        var rowsHtml = m.items.map(function(o) {
+          var checkCls = o.checked ? "rh-check checked" : "rh-check unchecked";
+          var statusPill = o.status === "ครบ" ? "mint" : (o.status === "ขาด" ? "amber" : "red");
+          return '<div class="soft-row row-between" style="margin-bottom:6px;">' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div style="font-size:13px;font-weight:700;">' + o.item + '</div>' +
+              '<div class="row-start" style="margin-top:6px;flex-wrap:wrap;">' +
+                '<select class="select-mini" onchange="updateOrderStatus(\'' + o.id + '\', this.value)">' +
+                  '<option value="ครบ"' + (o.status === "ครบ" ? " selected" : "") + '>ครบ (' + o.actualQty + '/' + o.orderedQty + ')</option>' +
+                  '<option value="ขาด"' + (o.status === "ขาด" ? " selected" : "") + '>ขาดของ</option>' +
+                  '<option value="ไม่มีของ"' + (o.status === "ไม่มีของ" ? " selected" : "") + '>ไม่มีของ</option>' +
+                '</select>' +
+                '<input type="number" class="input-mini" value="' + o.price + '" min="0" onchange="updateOrderPrice(\'' + o.id + '\', this.value)" title="ราคาจริงหน้าร้าน">' +
+                '<span style="font-size:11px;font-weight:700;">฿</span>' +
+                (o.photoUrl ? '<button type="button" class="btn-photo-pink" onclick="openPhotoModal(\'' + o.id + '\')">🖼️ ดูรูป</button>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="' + checkCls + '" onclick="toggleOrderCheck(\'' + o.id + '\')" title="ช่องติ๊กอยู่ขวามือ">✓</div>' +
+          '</div>';
+        }).join("");
+
+        card.innerHTML = header + rowsHtml;
+        container.appendChild(card);
+      });
+
+      document.getElementById("shop-grand-total").textContent = "รวมค่าของ: " + grandRaw + " ฿";
+    }
+
+    function renderVatTab() {
+      var container = document.getElementById("vat-summary-container");
+      var members = calcMemberTotals();
+      container.innerHTML = "";
+
+      members.forEach(function(m) {
+        var row = document.createElement("div");
+        row.className = "soft-row";
+        var editButtons = m.items.map(function(o) {
+          var allowed = canEditOrder(o);
+          var btnLabel = allowed ? "✎ แก้ไข " + o.item : "🔒 เฉพาะ " + o.owner;
+          var btnStyle = allowed ? "background:var(--act-amber);color:var(--ink);" : "background:#e2e8f0;color:#64748b;cursor:not-allowed;";
+          return '<button type="button" onclick="openEditOrder(\'' + o.id + '\')" style="border:none;border-radius:999px;padding:4px 10px;font-size:10.5px;font-weight:700;cursor:pointer;' + btnStyle + '">' + btnLabel + '</button>';
+        }).join(" ");
+
+        row.innerHTML = '<div class="row-between" style="margin-bottom:6px;">' +
+          '<div><strong>' + m.owner + '</strong> <span style="font-size:11px;color:var(--ink-muted);">(ค่าของ ' + m.rawTotal + ' + VAT/SC ' + m.vatSc + ')</span></div>' +
+          '<strong style="font-size:14px;color:var(--act-indigo);">' + m.netTotal + ' ฿</strong>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + editButtons + '</div>';
+        container.appendChild(row);
+      });
+    }
+
+    function renderDetailTab() {
+      var members = calcMemberTotals();
+      var netSum = members.reduce(function(acc, m) { return acc + m.netTotal; }, 0);
+      document.getElementById("detail-net-total").textContent = "฿ " + netSum;
+
+      var container = document.getElementById("detail-breakdown-container");
+      container.innerHTML = members.map(function(m) {
+        var itemsHtml = m.items.map(function(o) {
+          var badge = o.status === "ครบ" ? '<span class="pill mint">ครบ</span>' : (o.status === "ขาด" ? '<span class="pill amber">ได้ ' + o.actualQty + '/' + o.orderedQty + '</span>' : '<span class="pill red">ไม่มีของ</span>');
+          return '<div class="row-between" style="font-size:12px;margin-top:4px;">' +
+            '<span>• ' + o.item + ' ' + badge + '</span>' +
+            '<span>' + (o.status === "ไม่มีของ" ? 0 : o.price) + ' ฿</span>' +
+          '</div>';
+        }).join("");
+
+        return '<div class="soft-row" style="margin-bottom:8px;">' +
+          '<div class="row-between" style="padding-bottom:4px;border-bottom:1px solid var(--border);">' +
+            '<strong>' + m.owner + '</strong>' +
+            '<strong style="color:var(--act-green);">ยอดสุทธิ ' + m.netTotal + ' บาท</strong>' +
+          '</div>' +
+          itemsHtml +
+          '<div class="row-between" style="font-size:11px;color:var(--ink-muted);margin-top:4px;">' +
+            '<span>+ หาร Service &amp; VAT</span><span>' + m.vatSc + ' ฿</span>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+
+    function renderStatusTab() {
+      var members = calcMemberTotals();
+      var totalDue = 0;
+      var collected = 0;
+      var unpaidCount = 0;
+
+      members.forEach(function(m) {
+        totalDue += m.netTotal;
+        if (m.paid) collected += m.netTotal;
+        else unpaidCount += 1;
+      });
+
+      var pct = totalDue > 0 ? Math.round((collected / totalDue) * 100) : 0;
+      document.getElementById("status-collected-text").textContent = "เก็บได้แล้ว: " + collected + " / " + totalDue + " ฿";
+      document.getElementById("status-progress-fill").style.width = pct + "%";
+
+      var remPill = document.getElementById("status-remaining-pill");
+      if (unpaidCount === 0) {
+        remPill.textContent = "ครบทุกคน 🎉";
+        remPill.className = "pill mint";
+      } else {
+        remPill.textContent = "รออีก " + unpaidCount + " คน";
+        remPill.className = "pill red";
+      }
+
+      var container = document.getElementById("status-members-container");
+      container.innerHTML = members.map(function(m) {
+        var badge = m.paid ? '<span class="pill mint">จ่ายแล้ว (' + m.slipMethod + ')</span>' : '<span class="pill red">ค้าง ' + m.netTotal + ' ฿</span>';
+        var btnCls = m.paid ? "int-btn sm green" : "int-btn sm amber";
+        var btnText = m.paid ? "✓ รับยอดแล้ว (กดเพื่อเปลี่ยน)" : "✓ กดยืนยันว่าจ่ายแล้ว";
+        return '<div class="clean-card">' +
+          '<div class="row-between" style="margin-bottom:8px;">' +
+            '<div><strong>' + m.owner + '</strong> <span style="font-size:12px;color:var(--ink-muted);">(' + m.netTotal + ' ฿)</span></div>' +
+            badge +
+          '</div>' +
+          '<button type="button" class="' + btnCls + '" onclick="toggleMemberPaid(\'' + m.owner + '\')">' + btnText + '</button>' +
+        '</div>';
+      }).join("");
+    }
+
+    // =========================================================================
+    // INTERACTIVE HANDLERS
+    // =========================================================================
+    window.openPhotoModal = function(orderId) {
+      var item = state.orders.find(function(o) { return o.id === orderId; });
+      if (!item || !item.photoUrl) {
+        showToast("รายการนี้ไม่มีรูปภาพแนบค่ะ");
+        return;
+      }
+      document.getElementById("modal-photo-title").textContent = "รูปสินค้า: " + item.item;
+      document.getElementById("modal-photo-img").src = item.photoUrl;
+      document.getElementById("modal-photo-caption").textContent = "สั่งโดย " + item.owner + " • จำนวน " + item.orderedQty + " ชิ้น";
+      document.getElementById("modal-photo").classList.add("active");
+    };
+
+    window.toggleOrderCheck = function(orderId) {
+      var item = state.orders.find(function(o) { return o.id === orderId; });
+      if (!item) return;
+      item.checked = !item.checked;
+      renderAll();
+    };
+
+    window.updateOrderStatus = function(orderId, newStatus) {
+      var item = state.orders.find(function(o) { return o.id === orderId; });
+      if (!item) return;
+      item.status = newStatus;
+      if (newStatus === "ไม่มีของ") item.actualQty = 0;
+      else if (newStatus === "ครบ") item.actualQty = item.orderedQty;
+      renderAll();
+    };
+
+    window.updateOrderPrice = function(orderId, newPrice) {
+      var item = state.orders.find(function(o) { return o.id === orderId; });
+      if (!item) return;
+      item.price = Math.max(0, Number(newPrice || 0));
+      renderAll();
+    };
+
+    window.openEditOrder = function(orderId) {
+      var item = state.orders.find(function(o) { return o.id === orderId; });
+      if (!item) return;
+      if (!canEditOrder(item)) {
+        showToast("⛔ แก้ไขได้เฉพาะเจ้าของรายการ (" + item.owner + ") เท่านั้น");
+        return;
+      }
+      state.editingOrderId = orderId;
+      document.getElementById("modal-edit-title").textContent = "แก้ไขรายการของ " + item.owner;
+      document.getElementById("edit-item-name").value = item.item;
+      document.getElementById("edit-item-qty").value = item.actualQty;
+      document.getElementById("edit-item-price").value = item.price;
+      document.getElementById("modal-edit").classList.add("active");
+    };
+
+    window.toggleMemberPaid = function(ownerName) {
+      var nextPaid = null;
+      state.orders.forEach(function(o) {
+        if (o.owner === ownerName) {
+          if (nextPaid === null) nextPaid = !o.paid;
+          o.paid = nextPaid;
+          if (nextPaid && o.slipMethod === "-") o.slipMethod = "เช็กมือ";
+        }
+      });
+      renderAll();
+      showToast(nextPaid ? "อัปเดตสถานะ " + ownerName + " เป็นจ่ายแล้ว ✓" : "เปลี่ยนสถานะ " + ownerName + " เป็นรอชำระ");
+    };
+
+    // =========================================================================
+    // SYNC & STORAGE (Safe for GitHub Pages + Make Webhook + Canvas)
+    // =========================================================================
+    function saveLocalState() {
+      try {
+        localStorage.setItem("line_errand_state_v3", JSON.stringify(state.orders));
+      } catch (e) {}
+    }
+
+    function syncToMake(actionType, payload) {
+      if (!CONFIG.MAKE_WEBHOOK_URL || CONFIG.MAKE_WEBHOOK_URL === "YOUR_MAKE_WEBHOOK_URL_HERE") {
+        return;
+      }
+      try {
+        fetch(CONFIG.MAKE_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: actionType, partyId: state.party.id, data: payload })
+        }).catch(function() {});
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // EVENT LISTENERS & LIFF INIT
+    // =========================================================================
+    document.querySelectorAll(".tab-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+        document.querySelectorAll(".view-panel").forEach(function(p) { p.classList.remove("active"); });
+        btn.classList.add("active");
+        var target = document.getElementById(btn.getAttribute("data-tab"));
+        if (target) target.classList.add("active");
+      });
+    });
+
+    document.getElementById("btn-switch-role").addEventListener("click", function() {
+      demoProfileIdx = (demoProfileIdx + 1) % demoProfiles.length;
+      state.currentUser = demoProfiles[demoProfileIdx];
+      document.getElementById("current-user-avatar").textContent = state.currentUser.name.charAt(0);
+      document.getElementById("current-user-name").textContent = state.currentUser.name + (state.currentUser.role === "runner" ? " (Runner)" : "");
+      renderAll();
+      showToast("สลับเป็นมุมมอง: " + state.currentUser.name);
+    });
+
+    document.getElementById("toggle-sc").addEventListener("click", function() {
+      state.party.useSC = !state.party.useSC;
+      this.classList.toggle("on", state.party.useSC);
+      this.textContent = state.party.useSC ? "เปิด 10%" : "ปิด";
+      renderAll();
+    });
+
+    document.getElementById("toggle-vat").addEventListener("click", function() {
+      state.party.useVAT = !state.party.useVAT;
+      this.classList.toggle("on", state.party.useVAT);
+      this.textContent = state.party.useVAT ? "เปิด 7%" : "ปิด";
+      renderAll();
+    });
+
+    document.getElementById("btn-close-modal").addEventListener("click", function() {
+      document.getElementById("modal-edit").classList.remove("active");
+    });
+
+    document.getElementById("btn-close-photo-modal").addEventListener("click", function() {
+      document.getElementById("modal-photo").classList.remove("active");
+    });
+
+    document.getElementById("btn-save-edit").addEventListener("click", function() {
+      var item = state.orders.find(function(o) { return o.id === state.editingOrderId; });
+      if (item) {
+        item.item = document.getElementById("edit-item-name").value.trim() || item.item;
+        item.actualQty = Math.max(0, Number(document.getElementById("edit-item-qty").value || 0));
+        item.price = Math.max(0, Number(document.getElementById("edit-item-price").value || 0));
+        item.status = item.actualQty === 0 ? "ไม่มีของ" : (item.actualQty < item.orderedQty ? "ขาด" : "ครบ");
+      }
+      document.getElementById("modal-edit").classList.remove("active");
+      renderAll();
+      syncToMake("update_order", item);
+      showToast("บันทึกการแก้ไขเรียบร้อย ✓");
+    });
+
+    document.getElementById("btn-open-add-item").addEventListener("click", function() {
+      var newId = "ORD-00" + (state.orders.length + 1);
+      state.orders.push({
+        id: newId,
+        userId: state.currentUser.userId,
+        owner: state.currentUser.name,
+        item: "รายการใหม่",
+        orderedQty: 1,
+        actualQty: 1,
+        status: "ครบ",
+        checked: false,
+        price: 50,
+        paid: false,
+        slipMethod: "-"
+      });
+      renderAll();
+      window.openEditOrder(newId);
+    });
+
+    document.getElementById("btn-copy-promptpay").addEventListener("click", function() {
+      var num = document.getElementById("promptpay-number").textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(num).then(function() { showToast("คัดลอกเลขพร้อมเพย์แล้ว: " + num); }).catch(function() { showToast("พร้อมเพย์: " + num); });
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = num;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); showToast("คัดลอกเลขพร้อมเพย์แล้ว: " + num); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+
+    document.getElementById("slip-file-input").addEventListener("change", function(e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        document.getElementById("slip-preview-img").src = ev.target.result;
+        document.getElementById("slip-preview-box").style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("btn-confirm-slip-upload").addEventListener("click", function() {
+      syncToMake("upload_slip", { user: state.currentUser.name });
+      showToast("แนบสลิปเรียบร้อย! กำลังแจ้งเตือนคนซื้อ ✓");
+    });
+
+    document.getElementById("btn-send-slip-chat").addEventListener("click", function() {
+      showToast("โยนรูปสลิปลงห้องแชท LINE ได้เลย บอทจะอ่านให้อัตโนมัติ");
+    });
+
+    document.getElementById("btn-send-bill-chat").addEventListener("click", function() {
+      var members = calcMemberTotals();
+      syncToMake("send_summary_bill", members);
+      showToast("ส่งการ์ดบิลสรุปเข้าห้องแชท LINE แล้ว 📤");
+    });
+
+    document.getElementById("btn-save-vat-sync").addEventListener("click", function() {
+      syncToMake("sync_vat", calcMemberTotals());
+      showToast("บันทึกการหาร VAT/SC เรียบร้อย ✓");
+    });
+
+    document.getElementById("btn-remind-unpaid").addEventListener("click", function() {
+      syncToMake("remind_unpaid", {});
+      showToast("ส่งการ์ดทวงยอดคนที่ยังไม่จ่ายแล้ว 📌");
+    });
+
+    document.getElementById("btn-close-party").addEventListener("click", function() {
+      state.orders.forEach(function(o) { o.paid = true; if (o.slipMethod === "-") o.slipMethod = "ปิดงาน"; });
+      renderAll();
+      syncToMake("close_party", {});
+      showToast("ปิดงานเรียบร้อย! จ่ายครบทุกคนแล้ว 🎉");
+    });
+
+    document.getElementById("btn-ad-click").addEventListener("click", function() {
+      showToast("เปิดลิงก์ร้านค้า Shopee / Affiliate");
+    });
+
+    // Initialize LIFF safely when deployed on GitHub Pages
+    window.addEventListener("load", function() {
+      renderAll();
+      if (typeof liff !== "undefined" && CONFIG.LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+        liff.init({ liffId: CONFIG.LIFF_ID }).then(function() {
+          if (liff.isLoggedIn()) {
+            liff.getProfile().then(function(profile) {
+              state.currentUser.userId = profile.userId;
+              state.currentUser.name = profile.displayName;
+              document.getElementById("current-user-avatar").textContent = profile.displayName.charAt(0);
+              document.getElementById("current-user-name").textContent = profile.displayName;
+              renderAll();
+            });
+          }
+        }).catch(function() {});
+      }
+    });
+  </script>
+</body>
+</html>
