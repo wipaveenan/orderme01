@@ -162,6 +162,17 @@
       padding: 10px 12px;
     }
 
+    .empty-state {
+      text-align: center;
+      padding: 36px 20px;
+      background: var(--surface-soft);
+      border: 1px dashed #cbd5e1;
+      border-radius: 16px;
+      color: var(--ink-muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
     .row-between {
       display: flex;
       align-items: center;
@@ -215,6 +226,9 @@
     .int-btn.red { background: var(--act-red); color: #ffffff; }
     .int-btn.yellow { background: var(--act-yellow); color: var(--ink); border: 1.5px solid var(--ink); }
     .int-btn.pink { background: var(--act-pink); color: var(--ink); }
+    .int-btn.black { background: var(--ink); color: #ffffff; }
+    .int-btn.sm { padding: 6px 10px; font-size: 11.5px; }
+
     .btn-photo-pink {
       background: var(--act-pink);
       color: var(--ink);
@@ -228,9 +242,6 @@
       align-items: center;
       gap: 4px;
     }
-    .btn-photo-pink:hover { opacity: 0.9; }
-    .int-btn.black { background: var(--ink); color: #ffffff; }
-    .int-btn.sm { padding: 6px 10px; font-size: 11.5px; }
 
     /* Right-Hand Ergonomic Checkbox */
     .rh-check {
@@ -256,7 +267,6 @@
       color: #ffffff;
     }
 
-    /* Form Controls */
     .input-mini {
       width: 78px;
       padding: 5px 8px;
@@ -289,7 +299,6 @@
       color: var(--ink);
     }
 
-    /* KhunThong-Style Summary Card */
     .kt-card {
       border: 1px solid var(--border);
       border-radius: 18px;
@@ -302,7 +311,6 @@
       padding: 14px 16px;
     }
 
-    /* Toggle Switch */
     .switch-btn {
       padding: 5px 12px;
       border-radius: 999px;
@@ -319,7 +327,6 @@
       color: #ffffff;
     }
 
-    /* Progress Bar */
     .progress-track {
       width: 100%;
       height: 10px;
@@ -334,7 +341,6 @@
       transition: width 0.3s ease;
     }
 
-    /* Non-intrusive Ad Banner Slot (Monetization) */
     .ad-banner {
       margin-top: auto;
       padding: 10px 12px;
@@ -348,7 +354,6 @@
       font-size: 11px;
     }
 
-    /* In-Page Toast & Modal (No alert/confirm) */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -366,10 +371,7 @@
       box-shadow: 0 10px 24px rgba(0,0,0,0.2);
       white-space: nowrap;
     }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     .modal-backdrop {
       position: fixed;
@@ -399,12 +401,12 @@
     <header class="top-header">
       <div class="header-row">
         <div>
-          <h1 class="party-title" id="party-name-title">ตี้ร้านตามสั่ง &amp; คาเฟ่</h1>
-          <div class="party-meta" id="party-meta-info">คนไปซื้อ: น้ำ • ปิดรับ 12:30 น.</div>
+          <h1 class="party-title" id="party-name-title">กำลังโหลดข้อมูลตี้...</h1>
+          <div class="party-meta" id="party-meta-info">เชื่อมต่อ Google Sheets</div>
         </div>
-        <button type="button" id="btn-switch-role" class="user-badge" title="สลับผู้ใช้เพื่อทดสอบสิทธิ์เจ้าของออเดอร์">
-          <span class="avatar-dot" id="current-user-avatar">น้ำ</span>
-          <span id="current-user-name">น้ำ (Runner)</span>
+        <button type="button" id="btn-refresh-data" class="user-badge" title="รีเฟรชข้อมูลล่าสุดจาก Google Sheets">
+          <span class="avatar-dot" id="current-user-avatar">ม</span>
+          <span id="current-user-name">รีเฟรช ↻</span>
         </button>
       </div>
 
@@ -419,22 +421,19 @@
 
     <main class="main-content">
 
-      <!-- ==================== TAB 1: STEP 3 CHECKLIST (RIGHT-HAND) ==================== -->
+      <!-- ==================== TAB 1: STEP 3 CHECKLIST ==================== -->
       <section id="tab-shop" class="view-panel active">
         <div class="row-between">
           <span style="font-size:12px;color:var(--ink-muted);font-weight:600;">ติ๊กถูกด้านขวามือ • แก้ไขราคาจริงหน้าร้าน</span>
-          <span class="pill yellow" id="shop-grand-total">รวมค่าของ: 173 ฿</span>
+          <span class="pill yellow" id="shop-grand-total">รวมค่าของ: 0 ฿</span>
         </div>
-
-        <!-- Dynamic Member Groups Rendered Here -->
         <div id="shop-list-container" style="display:flex;flex-direction:column;gap:12px;"></div>
-
         <button type="button" id="btn-send-bill-chat" class="int-btn green">
           📤 สรุปบิล &amp; ส่งการ์ดเข้ากลุ่ม LINE
         </button>
       </section>
 
-      <!-- ==================== TAB 2: RECEIPT & VAT/SC SPLIT + EDIT ==================== -->
+      <!-- ==================== TAB 2: RECEIPT & VAT/SC SPLIT ==================== -->
       <section id="tab-vat" class="view-panel">
         <div class="clean-card">
           <div class="row-between" style="margin-bottom:10px;">
@@ -444,7 +443,6 @@
             </div>
             <span class="pill purple">AI ใบเสร็จ</span>
           </div>
-
           <div class="soft-row row-between" style="margin-bottom:8px;">
             <span style="font-size:12.5px;font-weight:700;">คิด Service Charge (10%)</span>
             <button type="button" id="toggle-sc" class="switch-btn on">เปิด 10%</button>
@@ -470,25 +468,23 @@
 
       <!-- ==================== TAB 3: BILL DETAIL & SLIP UPLOAD ==================== -->
       <section id="tab-detail" class="view-panel">
-        <!-- KhunThong-Style Summary Header -->
         <div class="kt-card">
           <div class="kt-head row-between">
             <div>
-              <div style="font-size:11px;opacity:0.95;" id="detail-party-title">ตี้ร้านตามสั่ง &amp; คาเฟ่ (รวม VAT/SC)</div>
-              <div style="font-size:26px;font-weight:800;line-height:1.15;" id="detail-net-total">฿ 204</div>
-              <div style="font-size:11px;opacity:0.9;">เรียกเก็บโดย น้ำ 💎</div>
+              <div style="font-size:11px;opacity:0.95;" id="detail-party-title">บิลสรุปยอด</div>
+              <div style="font-size:26px;font-weight:800;line-height:1.15;" id="detail-net-total">฿ 0</div>
+              <div style="font-size:11px;opacity:0.9;" id="detail-runner-label">เรียกเก็บโดยคนไปซื้อ 💎</div>
             </div>
             <span class="pill yellow">บิลสรุป</span>
           </div>
           <div style="padding:12px 14px;" id="detail-breakdown-container"></div>
         </div>
 
-        <!-- PromptPay & Slip Upload -->
         <div class="clean-card">
           <div class="row-between" style="margin-bottom:10px;">
             <div>
-              <div style="font-size:11px;color:var(--ink-muted);">พร้อมเพย์คนไปซื้อ (น้ำ)</div>
-              <div style="font-size:15px;font-weight:800;" id="promptpay-number">083-085-5587</div>
+              <div style="font-size:11px;color:var(--ink-muted);">พร้อมเพย์คนไปซื้อ</div>
+              <div style="font-size:15px;font-weight:800;" id="promptpay-number">-</div>
             </div>
             <button type="button" id="btn-copy-promptpay" class="int-btn sm blue" style="width:auto;padding:7px 14px;">
               📋 คัดลอกเลข
@@ -520,11 +516,11 @@
       <section id="tab-status" class="view-panel">
         <div class="clean-card">
           <div class="row-between" style="margin-bottom:8px;">
-            <span style="font-size:13px;font-weight:800;" id="status-collected-text">เก็บได้แล้ว: 139 / 204 ฿</span>
-            <span class="pill red" id="status-remaining-pill">รออีก 1 คน</span>
+            <span style="font-size:13px;font-weight:800;" id="status-collected-text">เก็บได้แล้ว: 0 / 0 ฿</span>
+            <span class="pill mint" id="status-remaining-pill">ยังไม่มีรายการ</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill" id="status-progress-fill" style="width:68%;"></div>
+            <div class="progress-fill" id="status-progress-fill" style="width:0%;"></div>
           </div>
         </div>
 
@@ -536,7 +532,7 @@
         </div>
       </section>
 
-      <!-- Non-intrusive Ad Banner Slot (Monetization) -->
+      <!-- Non-intrusive Ad Banner Slot -->
       <div class="ad-banner">
         <div>
           <span class="pill pink" style="margin-bottom:3px;">แนะนำพิเศษ</span>
@@ -549,7 +545,7 @@
     </main>
   </div>
 
-  <!-- Edit Item Modal (Owner / Runner Only) -->
+  <!-- Edit Item Modal -->
   <div id="modal-edit" class="modal-backdrop">
     <div class="modal-box">
       <div class="row-between" style="margin-bottom:12px;">
@@ -590,51 +586,38 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
   <div id="toast" class="toast">บันทึกเรียบร้อย</div>
 
   <script>
     // =========================================================================
-    // CONFIGURATION — ใส่ค่าจริงของคุณก่อนอัปโหลดขึ้น GitHub Pages
+    // CONFIGURATION — ผูกกับ LIFF ID และ Google Sheets จริงของคุณ
     // =========================================================================
     var CONFIG = {
-      LIFF_ID: "YOUR_LIFF_ID_HERE", // เช่น "200xxxxxxx-xxxxxxxx" จาก LINE Login Channel
-      MAKE_WEBHOOK_URL: "YOUR_MAKE_WEBHOOK_URL_HERE" // ลิงก์ Webhook จาก Make (Integromat)
+      LIFF_ID: "2012688083-suD6rrH5",
+      SHEET_ID: "1uPBUizWluL_bUSGEh1f7xVkF9whPfKYsMfEiNfvaEyo",
+      MAKE_WEBHOOK_URL: "YOUR_MAKE_WEBHOOK_URL_HERE"
     };
 
     // =========================================================================
-    // IN-MEMORY STATE (ตรงกับโครงสร้าง Google Sheets: Orders, Member_Summary, Party_Config)
+    // CLEAN INITIAL STATE (ไม่มีข้อมูลจำลองของ เอ/บี/ซี ค้างอยู่)
     // =========================================================================
     var state = {
-      currentUser: { userId: "U_RUNNER_NAM", name: "น้ำ", role: "runner" },
+      currentUser: { userId: "", name: "ผู้ใช้งาน", role: "runner" },
       party: {
-        id: "PTY-20261118",
-        name: "ตี้ร้านตามสั่ง & คาเฟ่",
-        runnerName: "น้ำ",
-        closeTime: "12:30 น.",
-        promptPay: "083-085-5587",
-        useSC: true,
-        useVAT: true
+        id: "",
+        name: "ยังไม่มีตี้รับฝากซื้อ",
+        runnerName: "-",
+        location: "-",
+        closeTime: "-",
+        promptPay: "-",
+        status: "ปิดตี้แล้ว",
+        useSC: false,
+        useVAT: false
       },
-      orders: [
-        { id: "ORD-001", userId: "U_USER_A_001", owner: "เอ (A)", item: "ข้าวผัดหมู", orderedQty: 1, actualQty: 1, status: "ครบ", checked: true, price: 60, paid: true, slipMethod: "ส่งในห้องแชท", photoUrl: "" },
-        { id: "ORD-002", userId: "U_USER_A_001", owner: "เอ (A)", item: "ข้าวไข่เจียว", orderedQty: 1, actualQty: 1, status: "ครบ", checked: true, price: 40, paid: true, slipMethod: "ส่งในห้องแชท", photoUrl: "" },
-        { id: "ORD-003", userId: "U_USER_B_002", owner: "บี (B)", item: "อเมริกาโน่เย็น (ไม่หวาน)", orderedQty: 1, actualQty: 1, status: "ครบ", checked: true, price: 55, paid: false, slipMethod: "-", photoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360' viewBox='0 0 360 360'><rect width='360' height='360' rx='24' fill='%23f8fafc'/><rect x='110' y='80' width='140' height='210' rx='18' fill='%23ffffff' stroke='%23cbd5e1' stroke-width='4'/><path d='M120 140 H240 L232 275 H128 Z' fill='%23451a03'/><rect x='135' y='110' width='90' height='35' rx='8' fill='%23bae6fd' opacity='0.7'/><rect x='174' y='35' width='12' height='110' rx='6' fill='%23ec4899'/><text x='180' y='325' text-anchor='middle' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23111111'>อเมริกาโน่เย็น ไม่หวาน 55.-</text></svg>" },
-        { id: "ORD-004", userId: "U_USER_C_003", owner: "ซี (C)", item: "โค้กซีโร่ กระป๋อง", orderedQty: 2, actualQty: 1, status: "ขาด", checked: true, price: 18, paid: true, slipMethod: "กดแนบรูปสลิป", photoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360' viewBox='0 0 360 360'><rect width='360' height='360' rx='24' fill='%23f8fafc'/><rect x='125' y='75' width='110' height='200' rx='20' fill='%23111111'/><rect x='125' y='125' width='110' height='60' fill='%23cc1400'/><text x='180' y='162' text-anchor='middle' font-family='sans-serif' font-size='20' font-weight='bold' fill='%23ffffff'>ZERO</text><text x='180' y='320' text-anchor='middle' font-family='sans-serif' font-size='18' font-weight='bold' fill='%23111111'>โค้กซีโร่ กระป๋อง 18.-</text></svg>" }
-      ],
+      orders: [],
       editingOrderId: null
     };
 
-    var demoProfiles = [
-      { userId: "U_RUNNER_NAM", name: "น้ำ", role: "runner" },
-      { userId: "U_USER_A_001", name: "เอ (A)", role: "requester" },
-      { userId: "U_USER_B_002", name: "บี (B)", role: "requester" }
-    ];
-    var demoProfileIdx = 0;
-
-    // =========================================================================
-    // HELPERS & CALCULATIONS
-    // =========================================================================
     function showToast(msg) {
       var t = document.getElementById("toast");
       if (!t) return;
@@ -643,10 +626,89 @@
       setTimeout(function() { t.classList.remove("show"); }, 2400);
     }
 
+    // =========================================================================
+    // LIVE GOOGLE SHEETS FETCH (อ่านข้อมูลจริงจาก Orders & Party_Config)
+    // =========================================================================
+    function fetchSheetTab(sheetName) {
+      var url = "https://docs.google.com/spreadsheets/d/" + CONFIG.SHEET_ID + "/gviz/tq?tqx=out:json&sheet=" + encodeURIComponent(sheetName) + "&_=" + Date.now();
+      return fetch(url)
+        .then(function(res) { return res.text(); })
+        .then(function(txt) {
+          var match = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+          if (!match) return [];
+          var json = JSON.parse(match[1]);
+          return (json.table && json.table.rows) ? json.table.rows : [];
+        });
+    }
+
+    function cellVal(row, idx) {
+      if (!row || !row.c || !row.c[idx] || row.c[idx].v === null || row.c[idx].v === undefined) return "";
+      return row.c[idx].v;
+    }
+
+    function loadLiveDataFromSheets() {
+      Promise.all([fetchSheetTab("Party_Config"), fetchSheetTab("Orders")])
+        .then(function(results) {
+          var cfgRows = results[0];
+          var ordRows = results[1];
+
+          // Parse Party_Config (vertical key-value in Col A & Col B)
+          cfgRows.forEach(function(r) {
+            var k = String(cellVal(r, 0)).trim();
+            var v = String(cellVal(r, 1)).trim();
+            if (k === "Party_ID") state.party.id = v;
+            else if (k === "ชื่อรอบเปิดตี้") state.party.name = v || "รอบเปิดตี้ปัจจุบัน";
+            else if (k === "ชื่อคนไปซื้อ (Runner)") state.party.runnerName = v || "-";
+            else if (k === "สถานที่") state.party.location = v || "-";
+            else if (k === "เวลาปิดรับ") state.party.closeTime = v || "-";
+            else if (k === "พร้อมเพย์คนไปซื้อ") state.party.promptPay = v || "-";
+            else if (k === "สถานะตี้") state.party.status = v || "ปิดตี้แล้ว";
+          });
+
+          // Parse Orders (Row 1 is header, gviz starts at Row 2)
+          var parsedOrders = [];
+          ordRows.forEach(function(r, idx) {
+            var itemName = String(cellVal(r, 5)).trim(); // Col F: ชื่อสินค้า
+            var userId = String(cellVal(r, 2)).trim();   // Col C: LINE_User_ID
+            if (!itemName && !userId) return;
+            var ownerName = String(cellVal(r, 3)).trim() || (userId ? "สมาชิก (" + userId.slice(-4) + ")" : "เพื่อนในกลุ่ม");
+            var orderedQty = Number(cellVal(r, 6)) || 1;
+            var actualQty = Number(cellVal(r, 7)) || orderedQty;
+            var estPrice = Number(cellVal(r, 8)) || 0;
+            var realPrice = cellVal(r, 13) !== "" ? Number(cellVal(r, 13)) : estPrice;
+            var photoUrl = String(cellVal(r, 9)).trim();
+            if (photoUrl === "-") photoUrl = "";
+            var storeStatus = String(cellVal(r, 11)).trim() || "ครบ";
+            var checkedVal = cellVal(r, 12);
+            var paidStatus = String(cellVal(r, 16)).trim();
+            var slipMethod = String(cellVal(r, 17)).trim() || "-";
+
+            parsedOrders.push({
+              id: String(cellVal(r, 0)).trim() || ("ROW-" + (idx + 2)),
+              userId: userId,
+              owner: ownerName,
+              item: itemName,
+              orderedQty: orderedQty,
+              actualQty: actualQty,
+              status: storeStatus.indexOf("ขาด") !== -1 ? "ขาด" : (storeStatus.indexOf("ไม่มี") !== -1 ? "ไม่มีของ" : "ครบ"),
+              checked: checkedVal === true || String(checkedVal).toUpperCase() === "TRUE",
+              price: realPrice,
+              paid: paidStatus === "จ่ายแล้ว",
+              slipMethod: slipMethod,
+              photoUrl: photoUrl
+            });
+          });
+          state.orders = parsedOrders;
+          renderAll();
+        })
+        .catch(function() {
+          renderAll();
+        });
+    }
+
     function getTaxMultiplier() {
       var sc = state.party.useSC ? 0.10 : 0;
       var vat = state.party.useVAT ? 0.07 : 0;
-      // Service Charge 10% + VAT 7% on top (or proportional ~17.7%)
       return (1 + sc) * (1 + vat);
     }
 
@@ -662,41 +724,57 @@
         map[o.owner].rawTotal += activePrice;
         if (!o.paid) map[o.owner].paid = false;
       });
-      var list = Object.keys(map).map(function(k) {
+      return Object.keys(map).map(function(k) {
         var m = map[k];
         m.netTotal = Math.round(m.rawTotal * mult);
         m.vatSc = m.netTotal - m.rawTotal;
         return m;
       });
-      return list;
     }
 
     function canEditOrder(order) {
-      return state.currentUser.role === "runner" || state.currentUser.userId === order.userId;
+      if (!state.currentUser.userId) return true;
+      return state.currentUser.userId === order.userId || state.currentUser.role === "runner";
     }
 
-    // =========================================================================
-    // RENDER FUNCTIONS
-    // =========================================================================
+    function renderHeader() {
+      var isOpen = state.party.status === "OPEN" || state.party.status === "เปิดรับออเดอร์";
+      document.getElementById("party-name-title").textContent = isOpen ? ("ตี้: " + state.party.location) : "ยังไม่มีตี้รับฝากซื้อ";
+      document.getElementById("party-meta-info").textContent = isOpen
+        ? ("ปิดรับ: " + state.party.closeTime + " • สถานะ: เปิดรับออเดอร์")
+        : ("พิมพ์ \"มาโต\" ในแชทกลุ่มเพื่อเปิดตี้ใหม่");
+      document.getElementById("promptpay-number").textContent = state.party.promptPay || "-";
+      document.getElementById("detail-party-title").textContent = isOpen ? ("ตี้ " + state.party.location) : "ยังไม่มีบิลเปิดอยู่";
+      document.getElementById("detail-runner-label").textContent = "เรียกเก็บโดย " + (state.party.runnerName || "คนไปซื้อ") + " 💎";
+    }
+
     function renderAll() {
+      renderHeader();
       renderShopTab();
       renderVatTab();
       renderDetailTab();
       renderStatusTab();
-      saveLocalState();
+    }
+
+    function emptyHtml(msg) {
+      return '<div class="empty-state">' + msg + '</div>';
     }
 
     function renderShopTab() {
       var container = document.getElementById("shop-list-container");
       var members = calcMemberTotals();
+      if (members.length === 0) {
+        container.innerHTML = emptyHtml("ยังไม่มีรายการฝากซื้อในรอบนี้ค่ะ<br>พิมพ์ <strong>\"มาโต\"</strong> ในกลุ่ม LINE เพื่อเปิดตี้และรับออเดอร์ได้เลย");
+        document.getElementById("shop-grand-total").textContent = "รวมค่าของ: 0 ฿";
+        return;
+      }
+
       var grandRaw = 0;
       container.innerHTML = "";
-
       members.forEach(function(m, idx) {
         grandRaw += m.rawTotal;
         var card = document.createElement("div");
         card.className = "clean-card";
-
         var header = '<div class="row-between" style="padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--border);">' +
           '<span style="font-size:13px;font-weight:800;">' + (idx + 1) + '. ของ ' + m.owner + '</span>' +
           '<span class="pill yellow">รวม: ' + m.rawTotal + ' ฿</span>' +
@@ -704,7 +782,6 @@
 
         var rowsHtml = m.items.map(function(o) {
           var checkCls = o.checked ? "rh-check checked" : "rh-check unchecked";
-          var statusPill = o.status === "ครบ" ? "mint" : (o.status === "ขาด" ? "amber" : "red");
           return '<div class="soft-row row-between" style="margin-bottom:6px;">' +
             '<div style="flex:1;min-width:0;">' +
               '<div style="font-size:13px;font-weight:700;">' + o.item + '</div>' +
@@ -726,15 +803,17 @@
         card.innerHTML = header + rowsHtml;
         container.appendChild(card);
       });
-
       document.getElementById("shop-grand-total").textContent = "รวมค่าของ: " + grandRaw + " ฿";
     }
 
     function renderVatTab() {
       var container = document.getElementById("vat-summary-container");
       var members = calcMemberTotals();
+      if (members.length === 0) {
+        container.innerHTML = emptyHtml("ยังไม่มีรายการให้คำนวณ VAT / Service Charge");
+        return;
+      }
       container.innerHTML = "";
-
       members.forEach(function(m) {
         var row = document.createElement("div");
         row.className = "soft-row";
@@ -760,6 +839,10 @@
       document.getElementById("detail-net-total").textContent = "฿ " + netSum;
 
       var container = document.getElementById("detail-breakdown-container");
+      if (members.length === 0) {
+        container.innerHTML = emptyHtml("ยังไม่มีรายละเอียดบิลในรอบนี้ค่ะ");
+        return;
+      }
       container.innerHTML = members.map(function(m) {
         var itemsHtml = m.items.map(function(o) {
           var badge = o.status === "ครบ" ? '<span class="pill mint">ครบ</span>' : (o.status === "ขาด" ? '<span class="pill amber">ได้ ' + o.actualQty + '/' + o.orderedQty + '</span>' : '<span class="pill red">ไม่มีของ</span>');
@@ -784,16 +867,22 @@
 
     function renderStatusTab() {
       var members = calcMemberTotals();
-      var totalDue = 0;
-      var collected = 0;
-      var unpaidCount = 0;
+      var container = document.getElementById("status-members-container");
+      if (members.length === 0) {
+        document.getElementById("status-collected-text").textContent = "เก็บได้แล้ว: 0 / 0 ฿";
+        document.getElementById("status-progress-fill").style.width = "0%";
+        document.getElementById("status-remaining-pill").textContent = "ยังไม่มีรายการ";
+        document.getElementById("status-remaining-pill").className = "pill mint";
+        container.innerHTML = emptyHtml("ยังไม่มีรายการเรียกเก็บเงิน");
+        return;
+      }
 
+      var totalDue = 0, collected = 0, unpaidCount = 0;
       members.forEach(function(m) {
         totalDue += m.netTotal;
         if (m.paid) collected += m.netTotal;
         else unpaidCount += 1;
       });
-
       var pct = totalDue > 0 ? Math.round((collected / totalDue) * 100) : 0;
       document.getElementById("status-collected-text").textContent = "เก็บได้แล้ว: " + collected + " / " + totalDue + " ฿";
       document.getElementById("status-progress-fill").style.width = pct + "%";
@@ -807,7 +896,6 @@
         remPill.className = "pill red";
       }
 
-      var container = document.getElementById("status-members-container");
       container.innerHTML = members.map(function(m) {
         var badge = m.paid ? '<span class="pill mint">จ่ายแล้ว (' + m.slipMethod + ')</span>' : '<span class="pill red">ค้าง ' + m.netTotal + ' ฿</span>';
         var btnCls = m.paid ? "int-btn sm green" : "int-btn sm amber";
@@ -822,9 +910,6 @@
       }).join("");
     }
 
-    // =========================================================================
-    // INTERACTIVE HANDLERS
-    // =========================================================================
     window.openPhotoModal = function(orderId) {
       var item = state.orders.find(function(o) { return o.id === orderId; });
       if (!item || !item.photoUrl) {
@@ -888,19 +973,8 @@
       showToast(nextPaid ? "อัปเดตสถานะ " + ownerName + " เป็นจ่ายแล้ว ✓" : "เปลี่ยนสถานะ " + ownerName + " เป็นรอชำระ");
     };
 
-    // =========================================================================
-    // SYNC & STORAGE (Safe for GitHub Pages + Make Webhook + Canvas)
-    // =========================================================================
-    function saveLocalState() {
-      try {
-        localStorage.setItem("line_errand_state_v3", JSON.stringify(state.orders));
-      } catch (e) {}
-    }
-
     function syncToMake(actionType, payload) {
-      if (!CONFIG.MAKE_WEBHOOK_URL || CONFIG.MAKE_WEBHOOK_URL === "YOUR_MAKE_WEBHOOK_URL_HERE") {
-        return;
-      }
+      if (!CONFIG.MAKE_WEBHOOK_URL || CONFIG.MAKE_WEBHOOK_URL === "YOUR_MAKE_WEBHOOK_URL_HERE") return;
       try {
         fetch(CONFIG.MAKE_WEBHOOK_URL, {
           method: "POST",
@@ -910,9 +984,6 @@
       } catch (e) {}
     }
 
-    // =========================================================================
-    // EVENT LISTENERS & LIFF INIT
-    // =========================================================================
     document.querySelectorAll(".tab-btn").forEach(function(btn) {
       btn.addEventListener("click", function() {
         document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
@@ -923,13 +994,9 @@
       });
     });
 
-    document.getElementById("btn-switch-role").addEventListener("click", function() {
-      demoProfileIdx = (demoProfileIdx + 1) % demoProfiles.length;
-      state.currentUser = demoProfiles[demoProfileIdx];
-      document.getElementById("current-user-avatar").textContent = state.currentUser.name.charAt(0);
-      document.getElementById("current-user-name").textContent = state.currentUser.name + (state.currentUser.role === "runner" ? " (Runner)" : "");
-      renderAll();
-      showToast("สลับเป็นมุมมอง: " + state.currentUser.name);
+    document.getElementById("btn-refresh-data").addEventListener("click", function() {
+      showToast("กำลังโหลดข้อมูลล่าสุด...");
+      loadLiveDataFromSheets();
     });
 
     document.getElementById("toggle-sc").addEventListener("click", function() {
@@ -981,7 +1048,8 @@
         checked: false,
         price: 50,
         paid: false,
-        slipMethod: "-"
+        slipMethod: "-",
+        photoUrl: ""
       });
       renderAll();
       window.openEditOrder(newId);
@@ -990,14 +1058,9 @@
     document.getElementById("btn-copy-promptpay").addEventListener("click", function() {
       var num = document.getElementById("promptpay-number").textContent.trim();
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(num).then(function() { showToast("คัดลอกเลขพร้อมเพย์แล้ว: " + num); }).catch(function() { showToast("พร้อมเพย์: " + num); });
+        navigator.clipboard.writeText(num).then(function() { showToast("คัดลอกเลขพร้อมเพย์แล้ว: " + num); }).catch(function() {});
       } else {
-        var ta = document.createElement("textarea");
-        ta.value = num;
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand("copy"); showToast("คัดลอกเลขพร้อมเพย์แล้ว: " + num); } catch (e) {}
-        document.body.removeChild(ta);
+        showToast("พร้อมเพย์: " + num);
       }
     });
 
@@ -1022,8 +1085,7 @@
     });
 
     document.getElementById("btn-send-bill-chat").addEventListener("click", function() {
-      var members = calcMemberTotals();
-      syncToMake("send_summary_bill", members);
+      syncToMake("send_summary_bill", calcMemberTotals());
       showToast("ส่งการ์ดบิลสรุปเข้าห้องแชท LINE แล้ว 📤");
     });
 
@@ -1048,9 +1110,13 @@
       showToast("เปิดลิงก์ร้านค้า Shopee / Affiliate");
     });
 
-    // Initialize LIFF safely when deployed on GitHub Pages
     window.addEventListener("load", function() {
-      renderAll();
+      document.getElementById("toggle-sc").classList.toggle("on", state.party.useSC);
+      document.getElementById("toggle-sc").textContent = state.party.useSC ? "เปิด 10%" : "ปิด";
+      document.getElementById("toggle-vat").classList.toggle("on", state.party.useVAT);
+      document.getElementById("toggle-vat").textContent = state.party.useVAT ? "เปิด 7%" : "ปิด";
+
+      loadLiveDataFromSheets();
       if (typeof liff !== "undefined" && CONFIG.LIFF_ID !== "YOUR_LIFF_ID_HERE") {
         liff.init({ liffId: CONFIG.LIFF_ID }).then(function() {
           if (liff.isLoggedIn()) {
@@ -1058,7 +1124,7 @@
               state.currentUser.userId = profile.userId;
               state.currentUser.name = profile.displayName;
               document.getElementById("current-user-avatar").textContent = profile.displayName.charAt(0);
-              document.getElementById("current-user-name").textContent = profile.displayName;
+              document.getElementById("current-user-name").textContent = profile.displayName + " ↻";
               renderAll();
             });
           }
